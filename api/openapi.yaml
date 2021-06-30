@@ -1,0 +1,161 @@
+openapi: 3.0.3
+
+info:
+  title: Snake-Bot API
+  description: |
+    Snake-Bot provides control over a swarm of bots running on a
+    preconfigured instance of Snake-Server.
+  version: 0.0.0
+  license:
+    name: MIT
+  contact:
+    name: Ivan Pushkin
+    url: https://twitter.com/IvanDeveloper
+
+servers:
+  - url: /api
+    description: Current instance.
+  - url: http://localhost:8080/api
+    description: HTTP instance at localhost 8080.
+  - url: http://localhost:9090/api
+    description: HTTP instance at localhost 9090.
+  - url: https://localhost:8080/api
+    description: HTTPS instance at localhost 8080.
+
+paths:
+  /bots:
+    post:
+      summary: Launches a swarm of bots in specified games.
+      description: |
+        The method launches a given number of bots in a specified games.
+      tags:
+        - Bots
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Game'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Games'
+          text/yaml:
+            schema:
+              $ref: '#/components/schemas/Games'
+      responses:
+        201:
+          description: Current setup.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Games'
+            text/yaml:
+              schema:
+                $ref: '#/components/schemas/Games'
+        400:
+          $ref: '#/components/responses/InvalidParameters'
+        500:
+          $ref: '#/components/responses/ServerError'
+        503:
+          description: Service unavailable, cannot create bots.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        404:
+          $ref: '#/components/responses/GameNotFound'
+    get:
+      summary: Returns the working current setup.
+      tags:
+        - Bots
+      security:
+        - ApiKeyAuth: []
+      responses:
+        200:
+          description: Current setup.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Games'
+            text/yaml:
+              schema:
+                $ref: '#/components/schemas/Games'
+
+components:
+
+  securitySchemes:
+
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-Snake-Bot-Token
+
+  responses:
+    InvalidParameters:
+      description: Invalid parameters.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    ServerError:
+      description: An internal server error.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    GameNotFound:
+      description: A game has not been found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+  schemas:
+    
+    Game:
+      type: object
+      description: |
+        The object contains a game identifier and a number of bots to launch.
+      required:
+        - game
+        - bots
+      properties:
+        game:
+          description: A game identifier.
+          type: integer
+          format: int32
+        bots:
+          description: A bots number.
+          type: integer
+          format: int32
+
+    Games:
+      type: object
+      description: The object contains a list of games and bots.
+      required:
+        - games
+      properties:
+        games:
+          description: A list of game identifiers and numbers of bots.
+          type: array
+          items:
+            $ref: '#/components/schemas/Game'
+
+    Error:
+      type: object
+      description: |
+        The object contains an error code and short description of what went
+        wrong.
+      required:
+        - code
+        - text
+      properties:
+        code:
+          description: Error code.
+          type: integer
+          format: int32
+        text:
+          description: Description.
+          type: string
