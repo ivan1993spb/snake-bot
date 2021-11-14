@@ -1,0 +1,6 @@
+*.diff
+*.patch
+*.log
+*.test
+*.out
+*.svg
