@@ -1,0 +1,44 @@
+name: Go
+
+on: push
+
+jobs:
+
+  build:
+    runs-on: ubuntu-18.04
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: 1.16.4
+
+    - name: Go Mod
+      run: go mod download
+
+    # TODO: Add Go format step.
+    #- name: Go Format
+    #  run: gofmt -s -w . && git diff --exit-code
+
+    - name: Go Tidy
+      run: go mod tidy && git diff --exit-code
+
+    - name: Go Vet
+      run: go vet
+
+    # TODO: Add a staticcheck step.
+    #- uses: dominikh/staticcheck-action@v1.2.0
+    #  with:
+    #    version: "2022.1"
+    #    install-go: false
+
+    # TODO: add go lint
+
+    - name: Go Build
+      run: go build -v ./...
+
+    - name: Go Test
+      run: go test -race -shuffle=on -coverprofile=coverage.txt -v -cover ./...
+
+    # TODO: Add test coverage.
