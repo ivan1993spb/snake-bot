@@ -20,7 +20,8 @@ COPY . .
 
 ENV CGO_ENABLED=0
 
-RUN go build -ldflags "-s -w -X main.Version=$VERSION -X main.Build=$BUILD" \
+RUN go build \
+    -ldflags "-s -w -X main.Version=${VERSION} -X main.Build=${BUILD::7}" \
     -v -x -o /snake-bot ./cmd/snake-bot
 
 FROM scratch
