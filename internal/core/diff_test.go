@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestDiff(t *testing.T) {
+func Test_diff(t *testing.T) {
 	const errFormat = "test case %d"
 
 	tests := []struct {
@@ -80,6 +80,61 @@ func TestDiff(t *testing.T) {
 
 	for i, test := range tests {
 		actualDiff := diff(test.have, test.want)
+		assert.Equal(t, test.diff, actualDiff, errFormat, i+1)
+	}
+}
+
+func Test_diffOne(t *testing.T) {
+	const errFormat = "test case %d"
+
+	tests := []struct {
+		have map[int]int
+		k    int
+		v    int
+		diff map[int]int
+	}{
+		{
+			have: map[int]int{
+				1: 10,
+				2: 8,
+				4: 32,
+			},
+			k: 12,
+			v: 1,
+			diff: map[int]int{
+				12: 1,
+			},
+		},
+		{
+			have: map[int]int{
+				1:  10,
+				2:  8,
+				4:  32,
+				12: 21,
+			},
+			k: 12,
+			v: 1,
+			diff: map[int]int{
+				12: -20,
+			},
+		},
+		{
+			have: map[int]int{
+				1:  10,
+				2:  8,
+				4:  32,
+				12: 21,
+			},
+			k: 2,
+			v: 10,
+			diff: map[int]int{
+				2: 2,
+			},
+		},
+	}
+
+	for i, test := range tests {
+		actualDiff := diffOne(test.k, test.v, test.have)
 		assert.Equal(t, test.diff, actualDiff, errFormat, i+1)
 	}
 }

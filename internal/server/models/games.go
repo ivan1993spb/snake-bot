@@ -4,7 +4,7 @@ type Games struct {
 	Games []*Game `json:"games",yaml:"games"`
 }
 
-func NewGames(state map[int]int) *Games {
+func NewGames(state map[uint]uint) *Games {
 	g := &Games{}
 	g.Games = make([]*Game, 0, len(state))
 	for game, bots := range state {
@@ -18,8 +18,8 @@ func NewGames(state map[int]int) *Games {
 	return g
 }
 
-func (g *Games) ToMapState() map[int]int {
-	state := make(map[int]int, len(g.Games))
+func (g *Games) ToMapState() map[uint]uint {
+	state := make(map[uint]uint, len(g.Games))
 	for _, game := range g.Games {
 		state[game.Game] = game.Bots
 	}

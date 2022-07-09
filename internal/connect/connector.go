@@ -33,7 +33,7 @@ type Connector struct {
 	http.Header
 }
 
-func NewConnector(cfg config.Target, clientName string) *Connector {
+func NewConnector(cfg config.Target, info *ClientInfo) *Connector {
 	c := &Connector{
 		address: cfg.Address,
 		wss:     cfg.WSS,
@@ -45,7 +45,7 @@ func NewConnector(cfg config.Target, clientName string) *Connector {
 	}
 
 	c.Header = http.Header{}
-	c.Header.Add(headerClientName, clientName)
+	c.Header.Add(headerClientName, info.String())
 
 	return c
 }

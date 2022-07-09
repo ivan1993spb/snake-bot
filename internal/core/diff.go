@@ -1,7 +1,13 @@
 package core
 
-func diff(have, want map[int]int) map[int]int {
-	d := make(map[int]int)
+// TODO: Add checks for negative numbers.
+
+type State map[uint]uint
+
+type Diff map[int]int
+
+func diff(have, want State) Diff {
+	d := make(Diff)
 
 	for k, v1 := range have {
 		if v2, ok := want[k]; ok {
@@ -24,4 +30,10 @@ func diff(have, want map[int]int) map[int]int {
 	}
 
 	return d
+}
+
+func diffOne(k, v int, have State) Diff {
+	return Diff{
+		k: v - have[k],
+	}
 }
