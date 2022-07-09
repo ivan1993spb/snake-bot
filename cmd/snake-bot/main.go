@@ -56,7 +56,12 @@ func main() {
 
 	headerAppInfo := utils.FormatAppInfoHeader(ApplicationName, Version, Build)
 
-	connector := connect.NewConnector(cfg.Target, headerAppInfo)
+	clientInfo := &connect.ClientInfo{
+		Name:    ApplicationName,
+		Version: Version,
+		Build:   Build,
+	}
+	connector := connect.NewConnector(cfg.Target)
 
 	c := core.NewCore(ctx, connector, cfg.Bots.Limit)
 
