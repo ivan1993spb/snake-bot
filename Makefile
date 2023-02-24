@@ -6,8 +6,8 @@ _=$(foreach exec,$(EXECUTABLES), \
 
 IMAGE=ivan1993spb/snake-bot
 
-IMAGE_GOLANG=golang:1.16.4-alpine3.13
-IMAGE_ALPINE=alpine:3.13
+IMAGE_GOLANG=golang:1.19.5-alpine3.16
+IMAGE_ALPINE=alpine:3.16
 
 BINARY_NAME=snake-bot
 VERSION=$(shell git describe --tags --abbrev=0 2>/dev/null || echo v0.0.0)
