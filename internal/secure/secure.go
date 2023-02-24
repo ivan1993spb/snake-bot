@@ -8,7 +8,6 @@ import (
 	"sync"
 
 	"github.com/pkg/errors"
-	"lukechampine.com/noescape"
 )
 
 type Secure struct {
@@ -32,8 +31,8 @@ var (
 func (s *Secure) GenerateToken(w io.Writer) error {
 	buffer := make([]byte, bufferSize)
 
-	// Doesn't let the buffer with a token escape to heap.
-	if _, err := noescape.Read(rand.Reader, buffer); err != nil {
+	// TODO: add noescape operators.
+	if _, err := rand.Reader.Read(buffer); err != nil {
 		return errors.Wrap(err, "generate token")
 	}
 
@@ -46,7 +45,7 @@ func (s *Secure) GenerateToken(w io.Writer) error {
 		return errors.Wrap(err, "fail to warn")
 	}
 	enc := base64.NewEncoder(base64.RawURLEncoding, w)
-	if _, err := noescape.Write(enc, buffer); err != nil {
+	if _, err := enc.Write(buffer); err != nil {
 		enc.Close()
 		return errors.Wrap(err, "write auth token")
 	}

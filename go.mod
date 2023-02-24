@@ -11,7 +11,6 @@ require (
 	github.com/sirupsen/logrus v1.8.1
 	github.com/stretchr/testify v1.7.0
 	gopkg.in/yaml.v2 v2.4.0
-	lukechampine.com/noescape v0.0.0-20191006153127-214c369a3d1b
 )
 
 require (
