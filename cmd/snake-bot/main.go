@@ -72,7 +72,12 @@ func main() {
 		Clock:              utils.RealClock,
 	})
 
-	serv := http.NewServer(ctx, cfg.Server, headerAppInfo, c, jwtSec)
+	serv := http.NewServer(http.ServerParams{
+		Core:    c,
+		Config:  cfg.Server,
+		Secure:  jwtSec,
+		AppInfo: headerAppInfo,
+	})
 
 	if err := serv.ListenAndServe(ctx); err != nil {
 		utils.GetLogger(ctx).WithError(err).Fatal("server error")

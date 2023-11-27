@@ -19,64 +19,61 @@ import (
 )
 
 type Core interface {
-	SetState(ctx context.Context, state map[int]int) (map[int]int, error)
-	SetOne(ctx context.Context, gameId, botsNumber int) (map[int]int, error)
-	GetState(ctx context.Context) map[int]int
+	handlers.AppGetState
+	handlers.AppSetState
 }
 
 type Secure interface {
 	middlewares.Secure
 }
 
-type Server struct {
-	ctx context.Context
-
-	server *http.Server
-
-	core Core
-	sec  Secure
+type ServerParams struct {
+	Config  config.Server
+	AppInfo string
+	Core    Core
+	Secure  Secure
 }
 
-func NewServer(ctx context.Context, cfg config.Server, appInfo string,
-	core Core, sec Secure) *Server {
+type Server struct {
+	server *http.Server
+	params ServerParams
+}
+
+func NewServer(params ServerParams) *Server {
 	s := &Server{
 		server: &http.Server{
-			Addr: cfg.Address,
-			BaseContext: func(net.Listener) context.Context {
-				return ctx
-			},
+			Addr: params.Config.Address,
 		},
-
-		core: core,
-		sec:  sec,
+		params: params,
 	}
 
-	s.initRoutes(ctx, cfg.Debug, cfg.ForbidCORS, appInfo)
+	s.server.Handler = s.initRoutes()
 
 	return s
 }
 
 const requestPostBotsThrottleLimit = 1
 
-func (s *Server) initRoutes(ctx context.Context, debug, forbidCORS bool,
-	appInfo string) {
+func (s *Server) initRoutes() http.Handler {
 	r := chi.NewRouter()
 
-	r.Use(middleware.Recoverer)
 	r.Use(middleware.RealIP)
 	r.Use(middlewares.RequestID)
 	r.Use(middlewares.NewRequestLogger())
-	r.Use(middleware.SetHeader("Server", appInfo))
+	r.Use(middleware.Recoverer)
+	r.Use(middleware.SetHeader("Server", s.params.AppInfo))
 	r.Use(middleware.GetHead)
+
 	// By default origins (domain, scheme, or port) don't matter.
-	if !forbidCORS {
+	if !s.params.Config.ForbidCORS {
 		r.Use(cors.AllowAll().Handler)
 	}
 
 	r.Get("/", handlers.WelcomeHandler)
 	r.With(middleware.NoCache).Get("/openapi.yaml", handlers.OpenAPIHandler)
+
 	r.Route("/api/bots", func(r chi.Router) {
-		r.Use(middlewares.JwtTokenAuth(s.sec))
+		r.Use(middlewares.JwtTokenAuth(s.params.Secure))
 		r.With(
 			middleware.AllowContentType(
 				"application/x-www-form-urlencoded",
@@ -84,16 +81,17 @@ func (s *Server) initRoutes(ctx context.Context, debug, forbidCORS bool,
 				"text/yaml",
 			),
 			middleware.Throttle(requestPostBotsThrottleLimit),
-		).Post("/", handlers.NewApplyStateHandler(s.core))
-		r.Get("/", handlers.NewReadStateHandler(s.core))
+		).Method("POST", "/", handlers.NewSetStateHandler(s.params.Core))
+		r.Method("GET", "/", handlers.NewGetStateHandler(s.params.Core))
 	})
 
-	if debug {
+	if s.params.Config.Debug {
 		r.Mount("/debug", middleware.Profiler())
 	}
+
 	r.Handle("/metrics", promhttp.Handler())
 
-	s.server.Handler = r
+	return r
 }
 
 const serverShutdownTimeout = time.Second
@@ -101,20 +99,29 @@ const serverShutdownTimeout = time.Second
 const fieldShutdownTimeout = "shutdown_timeout"
 
 func (s *Server) ListenAndServe(ctx context.Context) error {
+	log := utils.GetLogger(ctx)
+	log.WithField("address", s.server.Addr).Info("starting server")
+
+	s.server.BaseContext = func(net.Listener) context.Context {
+		return utils.WithModule(ctx, "handler")
+	}
+
 	go func() {
 		<-ctx.Done()
 
-		log := utils.GetLogger(ctx).WithField(fieldShutdownTimeout, serverShutdownTimeout)
+		log := log.WithField(fieldShutdownTimeout, serverShutdownTimeout)
 		log.Info("shutting down")
 
 		shutdownCtx, cancel := context.WithTimeout(
 			context.Background(),
 			serverShutdownTimeout,
 		)
+
 		defer cancel()
 
 		go func() {
 			<-shutdownCtx.Done()
+
 			if shutdownCtx.Err() == context.DeadlineExceeded {
 				log.Error("graceful shutdown timed out")
 				log.Fatal("forcing exit")
@@ -130,5 +137,6 @@ func (s *Server) ListenAndServe(ctx context.Context) error {
 	if err == http.ErrServerClosed {
 		return nil
 	}
+
 	return errors.Wrap(err, "listen and serve")
 }
