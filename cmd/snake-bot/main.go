@@ -7,6 +7,7 @@ import (
 	"syscall"
 
 	"github.com/spf13/afero"
+	"go.uber.org/automaxprocs/maxprocs"
 
 	"github.com/ivan1993spb/snake-bot/internal/app"
 	"github.com/ivan1993spb/snake-bot/internal/config"
@@ -26,6 +27,11 @@ func main() {
 
 	if err != nil {
 		log.WithError(err).Fatal("config fail")
+	}
+
+	_, err = maxprocs.Set()
+	if err != nil {
+		log.WithError(err).Fatal("maxprocs fail")
 	}
 
 	application := &app.App{
