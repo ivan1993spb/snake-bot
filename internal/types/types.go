@@ -86,18 +86,13 @@ var (
 		errDotUnmarshalJSONAnnotation, "invalid structure")
 )
 
-const (
-	dotTokenOpen  = '['
-	dotTokenClose = ']'
-)
-
 func (d *Dot) UnmarshalJSON(b []byte) error {
 	if len(b) < 2 {
 		return ErrDotUnmarshalJSONInsufficientInput
 	}
 	var op, cl byte
 	op, b, cl = b[0], b[1:len(b)-1], b[len(b)-1]
-	if op != dotTokenOpen || cl != dotTokenClose {
+	if op != '[' || cl != ']' {
 		return ErrDotUnmarshalJSONInvalidStructure
 	}
 	axes := bytes.SplitN(b, []byte{','}, 2)
