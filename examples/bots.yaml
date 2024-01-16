@@ -1,0 +1,11 @@
+games:
+- game: 1
+  bots: 5
+- game: 2
+  bots: 11
+- game: 3
+  bots: 2
+- game: 4
+  bots: 12
+- game: 5
+  bots: 2
