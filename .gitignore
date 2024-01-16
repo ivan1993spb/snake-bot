@@ -1,3 +1,9 @@
+/snake-bot
+/*.html
+*.yaml
+*.json
+*.base64
+*.jwt
 *.diff
 *.patch
 *.log
