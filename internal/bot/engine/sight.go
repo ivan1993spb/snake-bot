@@ -9,9 +9,6 @@ type Sight struct {
 	topLeft types.Dot
 
 	zeroedBottomRight types.Dot
-
-	width  uint8
-	height uint8
 }
 
 // sightDivisor defines how many intervals of a given length

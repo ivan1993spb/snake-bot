@@ -144,8 +144,15 @@ func Benchmark_Map_Access(b *testing.B) {
 	b.ReportAllocs()
 	b.ResetTimer()
 
+	var (
+		v  interface{}
+		ok bool
+	)
+
 	for i := 0; i < b.N; i++ {
 		dot := dots[i%l]
-		_, _ = h[dot]
+		v, ok = h[dot]
 	}
+
+	_, _ = v, ok
 }
