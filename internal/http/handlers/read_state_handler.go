@@ -6,7 +6,7 @@ import (
 
 	"gopkg.in/yaml.v2"
 
-	"github.com/ivan1993spb/snake-bot/internal/server/models"
+	"github.com/ivan1993spb/snake-bot/internal/http/models"
 	"github.com/ivan1993spb/snake-bot/internal/utils"
 )
 

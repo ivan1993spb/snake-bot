@@ -1,4 +1,4 @@
-package server
+package http
 
 import (
 	"context"
@@ -13,8 +13,8 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 
 	"github.com/ivan1993spb/snake-bot/internal/config"
-	"github.com/ivan1993spb/snake-bot/internal/server/handlers"
-	"github.com/ivan1993spb/snake-bot/internal/server/middlewares"
+	"github.com/ivan1993spb/snake-bot/internal/http/handlers"
+	"github.com/ivan1993spb/snake-bot/internal/http/middlewares"
 	"github.com/ivan1993spb/snake-bot/internal/utils"
 )
 

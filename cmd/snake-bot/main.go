@@ -12,8 +12,8 @@ import (
 	"github.com/ivan1993spb/snake-bot/internal/config"
 	"github.com/ivan1993spb/snake-bot/internal/connect"
 	"github.com/ivan1993spb/snake-bot/internal/core"
+	"github.com/ivan1993spb/snake-bot/internal/http"
 	"github.com/ivan1993spb/snake-bot/internal/secure"
-	"github.com/ivan1993spb/snake-bot/internal/server"
 	"github.com/ivan1993spb/snake-bot/internal/utils"
 )
 
@@ -60,7 +60,7 @@ func main() {
 
 	c := core.NewCore(ctx, connector, cfg.Bots.Limit)
 
-	serv := server.NewServer(ctx, cfg.Server, headerAppInfo, c, sec)
+	serv := http.NewServer(ctx, cfg.Server, headerAppInfo, c, sec)
 
 	if err := serv.ListenAndServe(ctx); err != nil {
 		utils.Log(ctx).WithError(err).Fatal("server error")
