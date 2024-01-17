@@ -1,7 +1,7 @@
 
 # See Makefile
-ARG IMAGE_GOLANG=golang:1.19.5-alpine3.16
-ARG IMAGE_ALPINE=alpine:3.16
+ARG IMAGE_GOLANG=golang:1.21.5-alpine3.19
+ARG IMAGE_ALPINE=alpine:3.19
 
 FROM $IMAGE_ALPINE AS helper
 
