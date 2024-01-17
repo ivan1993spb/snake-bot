@@ -7,7 +7,7 @@ FROM $IMAGE_ALPINE AS helper
 
 RUN adduser -u 10001 -h /dev/null -H -D -s /sbin/nologin snake
 
-RUN sed -i '/^snake/!d' /etc/passwd
+RUN sed -i '/^snake/!d' /etc/passwd /etc/group
 
 FROM $IMAGE_GOLANG AS builder
 
@@ -29,6 +29,7 @@ RUN go build \
 FROM scratch
 
 COPY --from=helper /etc/passwd /etc/passwd
+COPY --from=helper /etc/group /etc/group
 
 USER snake
 
