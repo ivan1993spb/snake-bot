@@ -23,6 +23,7 @@ jobs:
     - name: Go Tidy
       run: go mod tidy && git diff --exit-code
 
+    # TODO: Add a propper vetting step go vet ./...
     - name: Go Vet
       run: go vet
 
