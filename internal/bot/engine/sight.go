@@ -14,23 +14,24 @@ type Sight struct {
 // sightDivisor defines how many intervals of a given length
 // we need to be able to fit within an area. In the 2D space
 // the divisor has to be 2:
-//                         ___
-//                          ^
-//                          |
-//                          |
-//                      distance
-//                          |
-//                          |
-//                          v
-//        |<---distance--->GAP<---distance--->|
-//                          ^
-//                          |
-//                          |
-//                      distance
-//                          |
-//                          |
-//                          v
-//                         ---
+//
+//	                 ___
+//	                  ^
+//	                  |
+//	                  |
+//	              distance
+//	                  |
+//	                  |
+//	                  v
+//	|<---distance--->GAP<---distance--->|
+//	                  ^
+//	                  |
+//	                  |
+//	              distance
+//	                  |
+//	                  |
+//	                  v
+//	                 ---
 const sightDivisor = 2
 
 const sightGap = 1
