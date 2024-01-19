@@ -1,7 +1,7 @@
 package models
 
 type Games struct {
-	Games []*Game `json:"games",yaml:"games"`
+	Games []*Game `json:"games" yaml:"games"`
 }
 
 func NewGames(state map[int]int) *Games {
