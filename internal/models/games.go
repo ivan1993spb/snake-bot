@@ -1,5 +1,7 @@
 package models
 
+import "sort"
+
 type Games struct {
 	Games []*Game `json:"games" yaml:"games"`
 }
@@ -15,6 +17,11 @@ func NewGames(state map[int]int) *Games {
 			})
 		}
 	}
+
+	sort.Slice(g.Games, func(i, j int) bool {
+		return g.Games[i].Game < g.Games[j].Game
+	})
+
 	return g
 }
 
