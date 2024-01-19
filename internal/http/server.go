@@ -65,7 +65,7 @@ func (s *Server) initRoutes(ctx context.Context, debug, forbidCORS bool,
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.RealIP)
 	r.Use(middleware.RequestID)
-	r.Use(middlewares.NewRequestLogger(utils.Log(ctx)))
+	r.Use(middlewares.NewRequestLogger())
 	r.Use(middleware.SetHeader("Server", appInfo))
 	r.Use(middleware.GetHead)
 	// By default origins (domain, scheme, or port) don't matter.
@@ -104,7 +104,7 @@ func (s *Server) ListenAndServe(ctx context.Context) error {
 	go func() {
 		<-ctx.Done()
 
-		log := utils.Log(ctx).WithField(fieldShutdownTimeout, serverShutdownTimeout)
+		log := utils.GetLogger(ctx).WithField(fieldShutdownTimeout, serverShutdownTimeout)
 		log.Info("shutting down")
 
 		shutdownCtx, cancel := context.WithTimeout(

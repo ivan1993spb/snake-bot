@@ -36,23 +36,23 @@ func main() {
 
 	{
 		logger := utils.NewLogger(cfg.Log)
-		ctx = utils.LogContext(ctx, logger)
+		ctx = utils.WithLogger(ctx, logger)
 	}
 
 	if err != nil {
-		utils.Log(ctx).WithError(err).Fatal("config fail")
+		utils.GetLogger(ctx).WithError(err).Fatal("config fail")
 	}
 
-	utils.Log(ctx).WithFields(logrus.Fields{
+	utils.GetLogger(ctx).WithFields(logrus.Fields{
 		"version": Version,
 		"build":   Build,
 	}).Info("Welcome to Snake-Bot!")
 
 	sec := secure.NewSecure()
 	if err := sec.GenerateToken(os.Stdout); err != nil {
-		utils.Log(ctx).WithError(err).Fatal("security fail")
+		utils.GetLogger(ctx).WithError(err).Fatal("security fail")
 	}
-	utils.Log(ctx).Warn("auth token successfully generated")
+	utils.GetLogger(ctx).Warn("auth token successfully generated")
 
 	headerAppInfo := utils.FormatAppInfoHeader(ApplicationName, Version, Build)
 
@@ -63,8 +63,8 @@ func main() {
 	serv := http.NewServer(ctx, cfg.Server, headerAppInfo, c, sec)
 
 	if err := serv.ListenAndServe(ctx); err != nil {
-		utils.Log(ctx).WithError(err).Fatal("server error")
+		utils.GetLogger(ctx).WithError(err).Fatal("server error")
 	}
 
-	utils.Log(ctx).Info("buh bye!")
+	utils.GetLogger(ctx).Info("buh bye!")
 }

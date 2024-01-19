@@ -13,6 +13,6 @@ func WelcomeHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 
 	if _, err := w.Write(welcomeMessage); err != nil {
-		utils.Log(r.Context()).WithError(err).Error("welcome handler fail")
+		utils.GetLogger(r.Context()).WithError(err).Error("welcome handler fail")
 	}
 }

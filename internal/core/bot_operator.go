@@ -33,7 +33,7 @@ func NewBotOperator(ctx context.Context, gameId int,
 		Me:        b,
 		Size:      g,
 		Game:      g,
-		Printer:   utils.NewPrinterLog(utils.Log(ctx), gameId),
+		Printer:   utils.NewPrinterLogger(utils.GetLogger(ctx)),
 	}
 
 	return &BotOperator{
@@ -58,7 +58,7 @@ func (bo *BotOperator) Run(ctx context.Context) {
 	retry:
 		conn, err := bo.connector.Connect(ctx, bo.gameId)
 		if err != nil {
-			utils.Log(ctx).WithError(err).Error("connect fail")
+			utils.GetLogger(ctx).WithError(err).Error("connect fail")
 
 			select {
 			case <-bo.stop:
@@ -79,7 +79,7 @@ func (bo *BotOperator) Run(ctx context.Context) {
 			for direction := range bo.bot.Run(ctx, bo.stop) {
 				message := direction.ToMessageSnakeCommand()
 				if err := conn.Send(message); err != nil {
-					utils.Log(ctx).WithError(err).Error(
+					utils.GetLogger(ctx).WithError(err).Error(
 						"connection send fail")
 				}
 			}
@@ -96,13 +96,13 @@ func (bo *BotOperator) Run(ctx context.Context) {
 				}
 				if err != nil {
 					if err != connect.ErrConnectionClosed {
-						utils.Log(ctx).WithError(err).Error(
+						utils.GetLogger(ctx).WithError(err).Error(
 							"connection receive fail")
 					}
 					break
 				}
 				if err := bo.parser.Parse(message); err != nil {
-					utils.Log(ctx).WithError(err).Error(
+					utils.GetLogger(ctx).WithError(err).Error(
 						"parse message fail")
 				}
 			}
@@ -114,7 +114,7 @@ func (bo *BotOperator) Run(ctx context.Context) {
 		}
 
 		if err := conn.Close(); err != nil {
-			utils.Log(ctx).WithError(err).Error("connection close fail")
+			utils.GetLogger(ctx).WithError(err).Error("connection close fail")
 		}
 
 		wg.Wait()

@@ -1,6 +1,8 @@
 package utils
 
 import (
+	"io"
+	"os"
 	"time"
 
 	"github.com/sirupsen/logrus"
@@ -13,8 +15,28 @@ const (
 	loggerTimestampFormat = time.RFC1123
 )
 
-func NewLogger(cfg config.Log) *logrus.Logger {
+var DiscardLogger = &logrus.Logger{
+	Out:          io.Discard,
+	Hooks:        make(logrus.LevelHooks),
+	Formatter:    new(NullFormatter),
+	Level:        logrus.PanicLevel,
+	ExitFunc:     os.Exit,
+	ReportCaller: false,
+}
+
+var DiscardEntry = logrus.NewEntry(DiscardLogger)
+
+type NullFormatter struct{}
+
+func (*NullFormatter) Format(*logrus.Entry) ([]byte, error) {
+	return nil, nil
+}
+
+const defaultLogLevel = logrus.InfoLevel
+
+func NewLogger(cfg config.Log) *logrus.Entry {
 	logger := logrus.New()
+
 	if cfg.EnableJSON {
 		logger.Formatter = &logrus.JSONFormatter{
 			TimestampFormat: loggerTimestampFormat,
@@ -25,10 +47,12 @@ func NewLogger(cfg config.Log) *logrus.Logger {
 			TimestampFormat: loggerTimestampFormat,
 		}
 	}
+
 	if level, err := logrus.ParseLevel(cfg.Level); err != nil {
-		logger.SetLevel(logrus.InfoLevel)
+		logger.SetLevel(defaultLogLevel)
 	} else {
 		logger.SetLevel(level)
 	}
-	return logger
+
+	return logrus.NewEntry(logger)
 }

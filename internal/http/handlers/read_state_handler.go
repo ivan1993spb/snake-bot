@@ -30,7 +30,7 @@ func NewReadStateHandler(app AppReadState) http.HandlerFunc {
 
 			err := yaml.NewEncoder(w).Encode(response)
 			if err != nil {
-				utils.Log(r.Context()).WithError(err).Error("write yaml response")
+				utils.GetLogger(r.Context()).WithError(err).Error("write yaml response")
 			}
 			return
 		}
@@ -39,7 +39,7 @@ func NewReadStateHandler(app AppReadState) http.HandlerFunc {
 		w.WriteHeader(http.StatusOK)
 		err := json.NewEncoder(w).Encode(response)
 		if err != nil {
-			utils.Log(r.Context()).WithError(err).Error("write json response")
+			utils.GetLogger(r.Context()).WithError(err).Error("write json response")
 		}
 	}
 }

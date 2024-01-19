@@ -91,14 +91,14 @@ func NewApplyStateHandler(app AppApplyState) http.HandlerFunc {
 		acceptType := r.Header.Get("Accept")
 		mediaType, _, err := mime.ParseMediaType(contentType)
 		if err != nil {
-			utils.Log(r.Context()).WithError(err).Error("parse media type")
+			utils.GetLogger(r.Context()).WithError(err).Error("parse media type")
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
 
 		handler, ok := handlersMapping[mediaType]
 		if !ok {
-			utils.Log(r.Context()).WithField(
+			utils.GetLogger(r.Context()).WithField(
 				"media_type", mediaType).Error("unknown media type")
 			w.WriteHeader(http.StatusBadRequest)
 			return
@@ -106,7 +106,7 @@ func NewApplyStateHandler(app AppApplyState) http.HandlerFunc {
 
 		state, err, statusCode := handler(r)
 		if err != nil {
-			utils.Log(r.Context()).WithError(err).Error("handle fail")
+			utils.GetLogger(r.Context()).WithError(err).Error("handle fail")
 			w.WriteHeader(statusCode)
 			return
 		}
@@ -117,7 +117,7 @@ func NewApplyStateHandler(app AppApplyState) http.HandlerFunc {
 			w.Header().Set("Content-Type", mediaTypeYaml)
 			w.WriteHeader(statusCode)
 			if err := yaml.NewEncoder(w).Encode(response); err != nil {
-				utils.Log(r.Context()).WithError(err).Error("write yaml response")
+				utils.GetLogger(r.Context()).WithError(err).Error("write yaml response")
 			}
 			return
 		}
@@ -125,7 +125,7 @@ func NewApplyStateHandler(app AppApplyState) http.HandlerFunc {
 		w.Header().Set("Content-Type", mediaTypeJson)
 		w.WriteHeader(statusCode)
 		if err := json.NewEncoder(w).Encode(response); err != nil {
-			utils.Log(r.Context()).WithError(err).Error("write json response")
+			utils.GetLogger(r.Context()).WithError(err).Error("write json response")
 		}
 	}
 }

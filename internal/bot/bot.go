@@ -127,7 +127,7 @@ func (b *Bot) operate(ctx context.Context) (types.Direction, bool) {
 		return types.DirectionZero, false
 	}
 	if b.lastDirection != direction || b.lastPosition != head {
-		utils.Log(ctx).WithFields(logrus.Fields{
+		utils.GetLogger(ctx).WithFields(logrus.Fields{
 			"head":      head,
 			"direction": direction,
 		}).Debugln("change direction")
