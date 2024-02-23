@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestDiff(t *testing.T) {
+func Test_diff(t *testing.T) {
 	const errFormat = "test case %d"
 
 	tests := []struct {
