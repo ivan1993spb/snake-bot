@@ -76,7 +76,7 @@ func (bo *BotOperator) Run(ctx context.Context) {
 
 		go func() {
 			defer wg.Done()
-			for direction := range bo.bot.Run(ctx, bo.stop) {
+			for direction := range bo.bot.Run(ctx) {
 				message := direction.ToMessageSnakeCommand()
 				if err := conn.Send(ctx, message); err != nil {
 					utils.GetLogger(ctx).WithError(err).Error(
