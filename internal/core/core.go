@@ -67,13 +67,6 @@ func (c *Core) ApplyState(state map[int]int) (map[int]int, error) {
 	return c.unsafeState(), nil
 }
 
-func stateBotsNumber(state map[int]int) (number int) {
-	for _, bots := range state {
-		number += bots
-	}
-	return
-}
-
 func (c *Core) unsafeApplyDiff(d map[int]int) {
 	for gameId, bots := range d {
 		if bots > 0 {

@@ -26,3 +26,23 @@ func diff(have, want map[int]int) map[int]int {
 
 	return d
 }
+
+func stateBotsNumber(state map[int]int) int {
+	number := 0
+	for _, bots := range state {
+		number += bots
+	}
+	return number
+}
+
+func diffStats(m map[int]int) (int, int) {
+	var add, remove int
+	for _, v := range m {
+		if v > 0 {
+			add += v
+		} else {
+			remove -= v
+		}
+	}
+	return add, remove
+}
