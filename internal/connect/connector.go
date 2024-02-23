@@ -5,33 +5,25 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
-	"sync"
 	"time"
-
-	"github.com/ivan1993spb/snake-bot/internal/config"
 
 	"github.com/gorilla/websocket"
 	"github.com/pkg/errors"
+
+	"github.com/ivan1993spb/snake-bot/internal/config"
 )
-
-const (
-	websocketInsecureScheme = "ws"
-	websocketSecureScheme   = "wss"
-)
-
-const gameWebsocketPathFormat = "/ws/games/%d"
-
-const handshakeTimeout = 45 * time.Second
-
-const headerClientName = "X-Snake-Client"
 
 type Connector struct {
 	address string
 	wss     bool
 
 	dialer *websocket.Dialer
-	http.Header
+	header http.Header
 }
+
+const handshakeTimeout = 45 * time.Second
+
+const HeaderClientName = "X-Snake-Client"
 
 func NewConnector(cfg config.Target, clientName string) *Connector {
 	c := &Connector{
@@ -44,11 +36,13 @@ func NewConnector(cfg config.Target, clientName string) *Connector {
 		HandshakeTimeout: handshakeTimeout,
 	}
 
-	c.Header = http.Header{}
-	c.Header.Add(headerClientName, clientName)
+	c.header = http.Header{}
+	c.header.Add(HeaderClientName, clientName)
 
 	return c
 }
+
+const gameWebsocketPathFormat = "/ws/games/%d"
 
 func getGameWebSocketPath(gameId int) string {
 	return fmt.Sprintf(gameWebsocketPathFormat, gameId)
@@ -57,11 +51,11 @@ func getGameWebSocketPath(gameId int) string {
 func (c *Connector) getGameWebWocketURL(gameId int) *url.URL {
 	u := &url.URL{
 		Host:   c.address,
-		Scheme: websocketInsecureScheme,
+		Scheme: "ws",
 	}
 
 	if c.wss {
-		u.Scheme = websocketSecureScheme
+		u.Scheme = "wss"
 	}
 
 	u.Path = getGameWebSocketPath(gameId)
@@ -70,15 +64,16 @@ func (c *Connector) getGameWebWocketURL(gameId int) *url.URL {
 }
 
 func (c *Connector) Connect(ctx context.Context, gameId int) (Connection, error) {
-	u := c.getGameWebWocketURL(gameId)
-	ws, resp, err := c.dialer.DialContext(ctx, u.String(), c.Header)
+	u := c.getGameWebWocketURL(gameId).String()
+	ws, resp, err := c.dialer.DialContext(ctx, u, c.header)
 	if err != nil {
-		return nil, errors.Wrap(err, "cannot connect")
+		return nil, errors.Wrap(err, "failed to connect")
 	}
+
 	conn := &connection{
 		conn: ws,
 		resp: resp,
-		mux:  &sync.Mutex{},
 	}
+
 	return conn, nil
 }
