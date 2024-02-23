@@ -78,7 +78,7 @@ func (bo *BotOperator) Run(ctx context.Context) {
 			defer wg.Done()
 			for direction := range bo.bot.Run(ctx, bo.stop) {
 				message := direction.ToMessageSnakeCommand()
-				if err := conn.Send(message); err != nil {
+				if err := conn.Send(ctx, message); err != nil {
 					utils.GetLogger(ctx).WithError(err).Error(
 						"connection send fail")
 				}
@@ -88,7 +88,7 @@ func (bo *BotOperator) Run(ctx context.Context) {
 		go func() {
 			defer wg.Done()
 			for {
-				message, err := conn.Receive()
+				message, err := conn.Receive(ctx)
 				if err == connect.ErrWrongMsgType {
 					// With a wrong message type we just skip the
 					// message.
@@ -113,7 +113,7 @@ func (bo *BotOperator) Run(ctx context.Context) {
 		case <-ctx.Done():
 		}
 
-		if err := conn.Close(); err != nil {
+		if err := conn.Close(ctx); err != nil {
 			utils.GetLogger(ctx).WithError(err).Error("connection close fail")
 		}
 

@@ -74,7 +74,7 @@ func Test_Connector_Success(t *testing.T) {
 		conn, err := connector.Connect(ctx, gameId)
 		require.NoError(t, err)
 		require.NotNil(t, conn)
-		require.NoError(t, conn.Close())
+		require.NoError(t, conn.Close(ctx))
 	})
 
 	wg.Wait()
