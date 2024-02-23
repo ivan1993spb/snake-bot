@@ -1,5 +1,6 @@
 package core
 
+// diff returns the difference between two maps.
 func diff(have, want map[int]int) map[int]int {
 	d := make(map[int]int)
 
