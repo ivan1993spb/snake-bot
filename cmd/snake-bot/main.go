@@ -2,10 +2,8 @@ package main
 
 import (
 	"context"
-	"math/rand"
 	"os"
 	"os/signal"
-	"time"
 
 	"github.com/sirupsen/logrus"
 
@@ -23,10 +21,6 @@ var (
 	Version = "dev"
 	Build   = "dev"
 )
-
-func init() {
-	rand.Seed(time.Now().UnixNano())
-}
 
 func main() {
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
@@ -56,9 +50,26 @@ func main() {
 
 	headerAppInfo := utils.FormatAppInfoHeader(ApplicationName, Version, Build)
 
+	// Module "connect" is responsible for connecting to the target server.
 	connector := connect.NewConnector(cfg.Target, headerAppInfo)
 
-	c := core.NewCore(ctx, connector, cfg.Bots.Limit)
+	rand := utils.NewRand(utils.RealClock)
+
+	// factory creates bot operators which are responsible for
+	// managing bots and their sessions.
+	factory := &core.DijkstrasBotOperatorFactory{
+		Logger:    utils.GetLogger(utils.WithModule(ctx, "notification")),
+		Rand:      rand,
+		Connector: connector,
+		Clock:     utils.RealClock,
+	}
+
+	// Module "core" manages bot operators.
+	c := core.NewCore(&core.Params{
+		BotsLimit:          cfg.Bots.Limit,
+		BotOperatorFactory: factory,
+		Clock:              utils.RealClock,
+	})
 
 	serv := http.NewServer(ctx, cfg.Server, headerAppInfo, c, sec)
 

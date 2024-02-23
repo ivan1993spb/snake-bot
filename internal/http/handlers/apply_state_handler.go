@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"encoding/json"
 	"mime"
 	"net/http"
@@ -14,8 +15,8 @@ import (
 )
 
 type AppApplyState interface {
-	ApplyState(state map[int]int) (map[int]int, error)
-	SetupOne(gameId, botsNumber int) (map[int]int, error)
+	SetState(ctx context.Context, state map[int]int) (map[int]int, error)
+	SetOne(ctx context.Context, gameId, botsNumber int) (map[int]int, error)
 }
 
 func NewApplyStateHandler(app AppApplyState) http.HandlerFunc {
@@ -27,7 +28,7 @@ func NewApplyStateHandler(app AppApplyState) http.HandlerFunc {
 
 	applyState := func(games *models.Games) (map[int]int, error, int) {
 		requested := games.ToMapState()
-		state, err := app.ApplyState(requested)
+		state, err := app.SetState(context.TODO(), requested)
 		if err != nil {
 			return nil, errors.Wrap(err, "apply state fail"),
 				http.StatusInternalServerError
@@ -36,7 +37,7 @@ func NewApplyStateHandler(app AppApplyState) http.HandlerFunc {
 	}
 
 	setupOne := func(gameId, bots int) (map[int]int, error, int) {
-		state, err := app.SetupOne(gameId, bots)
+		state, err := app.SetOne(context.TODO(), gameId, bots)
 		if err != nil {
 			return nil, errors.Wrap(err, "setup one fail"),
 				http.StatusInternalServerError

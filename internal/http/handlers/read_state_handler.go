@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 
@@ -11,7 +12,7 @@ import (
 )
 
 type AppReadState interface {
-	ReadState() map[int]int
+	GetState(ctx context.Context) map[int]int
 }
 
 func NewReadStateHandler(app AppReadState) http.HandlerFunc {
@@ -21,7 +22,7 @@ func NewReadStateHandler(app AppReadState) http.HandlerFunc {
 	)
 	return func(w http.ResponseWriter, r *http.Request) {
 		accept := r.Header.Get("Accept")
-		state := app.ReadState()
+		state := app.GetState(context.TODO())
 		response := models.NewGames(state)
 
 		if accept == typeYaml {

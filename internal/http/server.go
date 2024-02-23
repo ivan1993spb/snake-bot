@@ -19,9 +19,9 @@ import (
 )
 
 type Core interface {
-	ApplyState(state map[int]int) (map[int]int, error)
-	SetupOne(gameId, botsNumber int) (map[int]int, error)
-	ReadState() map[int]int
+	SetState(ctx context.Context, state map[int]int) (map[int]int, error)
+	SetOne(ctx context.Context, gameId, botsNumber int) (map[int]int, error)
+	GetState(ctx context.Context) map[int]int
 }
 
 type Secure interface {
