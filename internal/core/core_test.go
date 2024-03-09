@@ -4,8 +4,10 @@ import (
 	"context"
 	"testing"
 
+	"github.com/spf13/afero"
 	"github.com/stretchr/testify/require"
 
+	"github.com/ivan1993spb/snake-bot/internal/config"
 	"github.com/ivan1993spb/snake-bot/internal/core"
 	"github.com/ivan1993spb/snake-bot/internal/core/corefakes"
 	"github.com/ivan1993spb/snake-bot/internal/utils"
@@ -23,6 +25,9 @@ func Test_Core(t *testing.T) {
 		BotsLimit:          botsLimit,
 		BotOperatorFactory: factory,
 		Clock:              utils.NeverClock,
+		Storage: core.NewStorage(afero.NewMemMapFs(), config.Storage{
+			Path: "test",
+		}),
 	}
 
 	c := core.NewCore(params)

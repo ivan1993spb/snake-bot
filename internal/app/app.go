@@ -53,11 +53,16 @@ func (a *App) Run(ctx context.Context) {
 		Clock:     a.Clock,
 	}
 
+	// Storage is responsible for storing the state.
+	storage := core.NewStorage(a.Fs, a.Config.Storage)
+	log.WithField("storage", storage.Type()).Info("storage initialized")
+
 	// Module "core" manages bot operators.
 	appCore := core.NewCore(&core.Params{
 		BotsLimit:          a.Config.Bots.Limit,
 		BotOperatorFactory: factory,
 		Clock:              a.Clock,
+		Storage:            storage,
 	})
 
 	done := appCore.Run(utils.WithModule(ctx, "core"))

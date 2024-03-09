@@ -211,6 +211,8 @@ func Test_Config_Fields_ReturnsFieldsOfTheConfig(t *testing.T) {
 
 		flagLabelLogEnableJSON: false,
 		flagLabelLogLevel:      "warning",
+
+		flagLabelStoragePath: "/var/lib/snakepit",
 	}, Config{
 		Server: Server{
 			Address: ":9999",
@@ -231,6 +233,10 @@ func Test_Config_Fields_ReturnsFieldsOfTheConfig(t *testing.T) {
 		Log: Log{
 			EnableJSON: false,
 			Level:      "warning",
+		},
+
+		Storage: Storage{
+			Path: "/var/lib/snakepit",
 		},
 	}.Fields())
 }

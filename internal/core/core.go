@@ -38,12 +38,15 @@ type Core struct {
 
 	factory BotOperatorFactory
 	clock   utils.Clock
+
+	storage Storage
 }
 
 type Params struct {
 	BotsLimit int
 	BotOperatorFactory
 	utils.Clock
+	Storage
 }
 
 const applyStateChSize = 100
@@ -58,6 +61,8 @@ func NewCore(params *Params) *Core {
 
 		factory: params.BotOperatorFactory,
 		clock:   params.Clock,
+
+		storage: params.Storage,
 	}
 }
 
@@ -85,6 +90,10 @@ func (c *Core) Run(ctx context.Context) <-chan struct{} {
 
 		log.Info("core started")
 
+		// TODO: Consider returning error from preloadState
+		// Preload state from storage
+		c.preloadState(ctx)
+
 		for {
 			select {
 			case <-ctx.Done():
@@ -101,6 +110,25 @@ func (c *Core) Run(ctx context.Context) <-chan struct{} {
 	}()
 
 	return done
+}
+
+func (c *Core) preloadState(ctx context.Context) {
+	log := utils.GetLogger(ctx)
+
+	log.Info("loading state from storage")
+
+	state, err := c.storage.Load(ctx)
+	if err != nil {
+		log.WithError(err).Error("failed to load state from storage")
+		return
+	}
+
+	if stateBotsNumber(state) > c.botsLimit {
+		log.WithField("bots_limit", c.botsLimit).Error("loaded state exceeds bots limit")
+		return
+	}
+
+	c.applyState(ctx, state)
 }
 
 func (c *Core) applyState(ctx context.Context, state map[int]int) map[int]int {
@@ -129,6 +157,15 @@ func (c *Core) applyState(ctx context.Context, state map[int]int) map[int]int {
 
 	// Save the new state
 	state = c.unsafeGetState()
+	err := c.storage.Save(ctx, state)
+	if err != nil {
+		log.WithError(err).Error("failed to save state to storage")
+
+		log.Info("reverting changes")
+		c.unsafeApplyDiff(ctx, invertDiff(d))
+
+		return oldState
+	}
 
 	return state
 }

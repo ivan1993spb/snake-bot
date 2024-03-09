@@ -84,6 +84,66 @@ func Test_diff(t *testing.T) {
 	}
 }
 
+func Test_invertDiff(t *testing.T) {
+	const errFormat = "test case %d"
+
+	tests := []struct {
+		diff, inverted map[int]int
+	}{
+		{
+			diff: map[int]int{
+				1: -1,
+				2: 3,
+				3: -1,
+				7: -1,
+				8: 5,
+				9: -2,
+			},
+			inverted: map[int]int{
+				1: 1,
+				2: -3,
+				3: 1,
+				7: 1,
+				8: -5,
+				9: 2,
+			},
+		},
+		{
+			diff: map[int]int{
+				1: -1,
+				2: -5,
+				3: -1,
+				4: 4,
+				5: 5,
+				6: 3,
+			},
+			inverted: map[int]int{
+				1: 1,
+				2: 5,
+				3: 1,
+				4: -4,
+				5: -5,
+				6: -3,
+			},
+		},
+		{
+			diff: map[int]int{
+				1: 10,
+				2: 8,
+			},
+			inverted: map[int]int{
+				1: -10,
+				2: -8,
+			},
+		},
+	}
+
+	for i, test := range tests {
+		actualInverted := invertDiff(test.diff)
+		assert.Equal(t, test.inverted, actualInverted, errFormat, i+1)
+	}
+}
+
 func Test_stateBotsNumber(t *testing.T) {
 	const errFormat = "test case %d"
 

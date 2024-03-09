@@ -19,6 +19,8 @@ const (
 
 	defaultLogEnableJSON = false
 	defaultLogLevel      = "info"
+
+	defaultStoragePath = ""
 )
 
 // Flag labels
@@ -35,6 +37,8 @@ const (
 
 	flagLabelLogEnableJSON = "log-json"
 	flagLabelLogLevel      = "log-level"
+
+	flagLabelStoragePath = "storage"
 )
 
 // Flag usage descriptions
@@ -51,6 +55,8 @@ const (
 
 	flagUsageLogEnableJSON = "use json logging format"
 	flagUsageLogLevel      = "log level: panic, fatal, error, warning, info or debug"
+
+	flagUsageStoragePath = "path to a state file"
 )
 
 // Server structure contains configurations for the server
@@ -76,12 +82,18 @@ type Log struct {
 	Level      string
 }
 
+// Storage structure defines preferences for storage
+type Storage struct {
+	Path string
+}
+
 // Config is a base server configuration structure
 type Config struct {
-	Server Server
-	Target Target
-	Log    Log
-	Bots   Bots
+	Server  Server
+	Target  Target
+	Log     Log
+	Bots    Bots
+	Storage Storage
 }
 
 // Fields returns a map of all configurations
@@ -99,6 +111,8 @@ func (c Config) Fields() map[string]interface{} {
 
 		flagLabelLogEnableJSON: c.Log.EnableJSON,
 		flagLabelLogLevel:      c.Log.Level,
+
+		flagLabelStoragePath: c.Storage.Path,
 	}
 }
 
@@ -123,6 +137,10 @@ var defaultConfig = Config{
 	Log: Log{
 		EnableJSON: defaultLogEnableJSON,
 		Level:      defaultLogLevel,
+	},
+
+	Storage: Storage{
+		Path: defaultStoragePath,
 	},
 }
 
@@ -162,6 +180,10 @@ func ParseFlags(flagSet *flag.FlagSet, args []string, defaults Config) (Config, 
 		defaults.Log.EnableJSON, flagUsageLogEnableJSON)
 	flagSet.StringVar(&config.Log.Level, flagLabelLogLevel,
 		defaults.Log.Level, flagUsageLogLevel)
+
+	// Storage
+	flagSet.StringVar(&config.Storage.Path, flagLabelStoragePath,
+		defaults.Storage.Path, flagUsageStoragePath)
 
 	if err := flagSet.Parse(args); err != nil {
 		return defaults, fmt.Errorf("cannot parse flags: %s", err)

@@ -27,6 +27,15 @@ func diff(have, want map[int]int) map[int]int {
 	return d
 }
 
+// invertDiff returns the inverted map.
+func invertDiff(m map[int]int) map[int]int {
+	r := make(map[int]int, len(m))
+	for k, v := range m {
+		r[k] = -v
+	}
+	return r
+}
+
 func stateBotsNumber(state map[int]int) int {
 	number := 0
 	for _, bots := range state {
