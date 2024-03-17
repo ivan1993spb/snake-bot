@@ -175,17 +175,17 @@ func Test_ParseFlags_ParsesFlagsCorrectly(t *testing.T) {
 
 func Test_Config_Fields_ReturnsFieldsOfTheConfig(t *testing.T) {
 	require.Equal(t, map[string]interface{}{
-		fieldLabelAddress:    ":9999",
-		fieldLabelForbidCORS: true,
-		fieldLabelDebug:      true,
+		flagLabelAddress:    ":9999",
+		flagLabelForbidCORS: true,
+		flagLabelDebug:      true,
 
-		fieldLabelSnakeServer: "localhost:9210",
-		fieldLabelWSS:         false,
+		flagLabelSnakeServer: "localhost:9210",
+		flagLabelWSS:         false,
 
-		fieldLabelBotsLimit: 1337,
+		flagLabelBotsLimit: 1337,
 
-		fieldLabelLogEnableJSON: false,
-		fieldLabelLogLevel:      "warning",
+		flagLabelLogEnableJSON: false,
+		flagLabelLogLevel:      "warning",
 	}, Config{
 		Server: Server{
 			Address: ":9999",
@@ -196,7 +196,7 @@ func Test_Config_Fields_ReturnsFieldsOfTheConfig(t *testing.T) {
 
 		Target: Target{
 			Address: "localhost:9210",
-			WSS:         false,
+			WSS:     false,
 		},
 
 		Bots: Bots{

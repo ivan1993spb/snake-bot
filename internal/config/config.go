@@ -50,21 +50,6 @@ const (
 	flagUsageLogLevel      = "log level: panic, fatal, error, warning, info or debug"
 )
 
-// Label names
-const (
-	fieldLabelAddress    = "address"
-	fieldLabelForbidCORS = "forbid-cors"
-	fieldLabelDebug      = "debug"
-
-	fieldLabelSnakeServer = "snake server"
-	fieldLabelWSS         = "wss"
-
-	fieldLabelBotsLimit = "bots-limit"
-
-	fieldLabelLogEnableJSON = "log-json"
-	fieldLabelLogLevel      = "log-level"
-)
-
 // Server structure contains configurations for the server
 type Server struct {
 	Address    string
@@ -98,17 +83,17 @@ type Config struct {
 // Fields returns a map of all configurations
 func (c Config) Fields() map[string]interface{} {
 	return map[string]interface{}{
-		fieldLabelAddress:    c.Server.Address,
-		fieldLabelForbidCORS: c.Server.ForbidCORS,
-		fieldLabelDebug:      c.Server.Debug,
+		flagLabelAddress:    c.Server.Address,
+		flagLabelForbidCORS: c.Server.ForbidCORS,
+		flagLabelDebug:      c.Server.Debug,
 
-		fieldLabelSnakeServer: c.Target.Address,
-		fieldLabelWSS:         c.Target.WSS,
+		flagLabelSnakeServer: c.Target.Address,
+		flagLabelWSS:         c.Target.WSS,
 
-		fieldLabelBotsLimit: c.Bots.Limit,
+		flagLabelBotsLimit: c.Bots.Limit,
 
-		fieldLabelLogEnableJSON: c.Log.EnableJSON,
-		fieldLabelLogLevel:      c.Log.Level,
+		flagLabelLogEnableJSON: c.Log.EnableJSON,
+		flagLabelLogLevel:      c.Log.Level,
 	}
 }
 
