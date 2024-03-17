@@ -64,7 +64,7 @@ func (s *Server) initRoutes(ctx context.Context, debug, forbidCORS bool,
 
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.RealIP)
-	r.Use(middleware.RequestID)
+	r.Use(middlewares.RequestID)
 	r.Use(middlewares.NewRequestLogger())
 	r.Use(middleware.SetHeader("Server", appInfo))
 	r.Use(middleware.GetHead)
