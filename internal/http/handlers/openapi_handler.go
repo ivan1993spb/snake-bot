@@ -8,10 +8,16 @@ import (
 )
 
 func OpenAPIHandler(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	ctx = utils.WithModule(ctx, "openapi_handler")
+	log := utils.GetLogger(ctx)
+
+	log.Info("openapi handler")
+
 	w.Header().Set("Content-Type", "text/yaml; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
 
 	if _, err := w.Write([]byte(snakebot.OpenAPISpec)); err != nil {
-		utils.GetLogger(r.Context()).WithError(err).Error("openapi handler fail")
+		log.WithError(err).Error("openapi handler fail")
 	}
 }
