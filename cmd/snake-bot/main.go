@@ -6,6 +6,7 @@ import (
 	"os/signal"
 
 	"github.com/sirupsen/logrus"
+	"github.com/spf13/afero"
 
 	"github.com/ivan1993spb/snake-bot/internal/config"
 	"github.com/ivan1993spb/snake-bot/internal/connect"
@@ -42,11 +43,11 @@ func main() {
 		"build":   Build,
 	}).Info("Welcome to Snake-Bot!")
 
-	sec := secure.NewSecure()
-	if err := sec.GenerateToken(os.Stdout); err != nil {
+	sec := secure.New(afero.NewOsFs(), utils.RealClock)
+	jwtSec, err := sec.JwtFromFile(ctx, cfg.Server.JWTSecret)
+	if err != nil {
 		utils.GetLogger(ctx).WithError(err).Fatal("security fail")
 	}
-	utils.GetLogger(ctx).Warn("auth token successfully generated")
 
 	headerAppInfo := utils.FormatAppInfoHeader(ApplicationName, Version, Build)
 
@@ -71,7 +72,7 @@ func main() {
 		Clock:              utils.RealClock,
 	})
 
-	serv := http.NewServer(ctx, cfg.Server, headerAppInfo, c, sec)
+	serv := http.NewServer(ctx, cfg.Server, headerAppInfo, c, jwtSec)
 
 	if err := serv.ListenAndServe(ctx); err != nil {
 		utils.GetLogger(ctx).WithError(err).Fatal("server error")

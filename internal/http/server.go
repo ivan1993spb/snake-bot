@@ -25,7 +25,7 @@ type Core interface {
 }
 
 type Secure interface {
-	VerifyToken(token string) bool
+	middlewares.Secure
 }
 
 type Server struct {
@@ -76,7 +76,7 @@ func (s *Server) initRoutes(ctx context.Context, debug, forbidCORS bool,
 	r.Get("/", handlers.WelcomeHandler)
 	r.With(middleware.NoCache).Get("/openapi.yaml", handlers.OpenAPIHandler)
 	r.Route("/api/bots", func(r chi.Router) {
-		r.Use(middlewares.TokenAuth(s.sec))
+		r.Use(middlewares.JwtTokenAuth(s.sec))
 		r.With(
 			middleware.AllowContentType(
 				"application/x-www-form-urlencoded",

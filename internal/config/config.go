@@ -8,6 +8,7 @@ import (
 // Default values for the server's settings
 const (
 	defaultAddress    = ":8080"
+	defaultJWTSecret  = "/etc/snake-bot/jwt-secret.base64"
 	defaultForbidCORS = false
 	defaultDebug      = false
 
@@ -23,6 +24,7 @@ const (
 // Flag labels
 const (
 	flagLabelAddress    = "address"
+	flagLabelJWTSecret  = "jwt-secret"
 	flagLabelForbidCORS = "forbid-cors"
 	flagLabelDebug      = "debug"
 
@@ -38,6 +40,7 @@ const (
 // Flag usage descriptions
 const (
 	flagUsageAddress    = "address to listen to"
+	flagUsageJWTSecret  = "path to a base64 encoded secret for JWT signing"
 	flagUsageForbidCORS = "forbid cross-origin resource sharing"
 	flagUsageDebug      = "add profiling routes"
 
@@ -53,6 +56,7 @@ const (
 // Server structure contains configurations for the server
 type Server struct {
 	Address    string
+	JWTSecret  string
 	ForbidCORS bool
 	Debug      bool
 }
@@ -84,6 +88,7 @@ type Config struct {
 func (c Config) Fields() map[string]interface{} {
 	return map[string]interface{}{
 		flagLabelAddress:    c.Server.Address,
+		flagLabelJWTSecret:  c.Server.JWTSecret,
 		flagLabelForbidCORS: c.Server.ForbidCORS,
 		flagLabelDebug:      c.Server.Debug,
 
@@ -101,6 +106,7 @@ func (c Config) Fields() map[string]interface{} {
 var defaultConfig = Config{
 	Server: Server{
 		Address:    defaultAddress,
+		JWTSecret:  defaultJWTSecret,
 		ForbidCORS: defaultForbidCORS,
 		Debug:      defaultDebug,
 	},
@@ -136,6 +142,8 @@ func ParseFlags(flagSet *flag.FlagSet, args []string, defaults Config) (Config, 
 	// Address
 	flagSet.StringVar(&config.Server.Address, flagLabelAddress,
 		defaults.Server.Address, flagUsageAddress)
+	flagSet.StringVar(&config.Server.JWTSecret, flagLabelJWTSecret,
+		defaults.Server.JWTSecret, flagUsageJWTSecret)
 	flagSet.BoolVar(&config.Server.ForbidCORS, flagLabelForbidCORS,
 		defaults.Server.ForbidCORS, flagUsageForbidCORS)
 	flagSet.BoolVar(&config.Server.Debug, flagLabelDebug,

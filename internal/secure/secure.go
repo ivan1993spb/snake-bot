@@ -1,73 +1,52 @@
 package secure
 
 import (
-	"crypto/rand"
-	"crypto/sha256"
+	"context"
 	"encoding/base64"
 	"io"
-	"sync"
+
+	"github.com/ivan1993spb/snake-bot/internal/utils"
 
 	"github.com/pkg/errors"
+	"github.com/spf13/afero"
 )
 
 type Secure struct {
-	mux *sync.Mutex
-	sum [sha256.Size]byte
+	fs    afero.Fs
+	clock utils.Clock
 }
 
-func NewSecure() *Secure {
+func New(fs afero.Fs, clock utils.Clock) *Secure {
 	return &Secure{
-		mux: &sync.Mutex{},
+		fs:    fs,
+		clock: clock,
 	}
 }
 
-const bufferSize = 48
-
-var (
-	messageTokenBegin = []byte("Auth token: ")
-	messageTokenEnd   = []byte("\n")
-)
-
-func (s *Secure) GenerateToken(w io.Writer) error {
-	buffer := make([]byte, bufferSize)
-
-	// TODO: add noescape operators.
-	if _, err := rand.Reader.Read(buffer); err != nil {
-		return errors.Wrap(err, "generate token")
-	}
-
-	sum := sha256.Sum256(buffer)
-	s.mux.Lock()
-	s.sum = sum
-	s.mux.Unlock()
-
-	if _, err := w.Write(messageTokenBegin); err != nil {
-		return errors.Wrap(err, "fail to warn")
-	}
-	enc := base64.NewEncoder(base64.RawURLEncoding, w)
-	if _, err := enc.Write(buffer); err != nil {
-		enc.Close()
-		return errors.Wrap(err, "write auth token")
-	}
-	enc.Close()
-	if _, err := w.Write(messageTokenEnd); err != nil {
-		return errors.Wrap(err, "fail to warn")
-	}
-
-	return nil
-}
-
-func (s *Secure) VerifyToken(token string) bool {
-	decoded, err := base64.RawURLEncoding.DecodeString(token)
+func (s *Secure) JwtFromFile(ctx context.Context, path string) (*Jwt, error) {
+	key, err := readBase64KeyFile(ctx, s.fs, path)
 	if err != nil {
-		return false
+		return nil, err
 	}
 
-	flag := false
-	sum := sha256.Sum256(decoded)
-	s.mux.Lock()
-	flag = sum == s.sum
-	s.mux.Unlock()
+	return NewJwt(key, s.clock), nil
+}
 
-	return flag
+func readBase64KeyFile(ctx context.Context, fs afero.Fs, path string) ([]byte, error) {
+	log := utils.GetLogger(ctx).WithField("path", path)
+	log.Info("reading signing key from file")
+
+	f, err := fs.Open(path)
+	if err != nil {
+		return nil, errors.Wrap(err, "open signing key file")
+	}
+	defer f.Close()
+
+	dec := base64.NewDecoder(base64.StdEncoding, f)
+	key, err := io.ReadAll(dec)
+	if err != nil {
+		return nil, errors.Wrap(err, "read signing key file")
+	}
+
+	return key, nil
 }
