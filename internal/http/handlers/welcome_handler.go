@@ -9,10 +9,16 @@ import (
 var welcomeMessage = []byte(`Welcome to Snake-Bot!`)
 
 func WelcomeHandler(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	ctx = utils.WithModule(ctx, "welcome_handler")
+	log := utils.GetLogger(ctx)
+
+	log.Info("welcome handler")
+
 	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
 
 	if _, err := w.Write(welcomeMessage); err != nil {
-		utils.GetLogger(r.Context()).WithError(err).Error("welcome handler fail")
+		log.WithError(err).Error("welcome handler fail")
 	}
 }
