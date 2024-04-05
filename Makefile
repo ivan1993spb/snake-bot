@@ -13,7 +13,11 @@ BINARY_NAME=snake-bot
 VERSION=$(shell git describe --tags --abbrev=0 2>/dev/null || echo v0.0.0)
 BUILD=$(shell git rev-parse --short HEAD)
 
-LDFLAGS=-ldflags "-s -w -X main.Version=$(VERSION) -X main.Build=$(BUILD)"
+MODULE=github.com/ivan1993spb/snake-bot
+LDFLAGS=-ldflags "-s -w \
+	-X $(MODULE)/internal/app.Version=$(VERSION) \
+	-X $(MODULE)/internal/app.Build=$(BUILD)"
+
 DOCKER_BUILD_ARGS=\
  --build-arg VERSION=$(VERSION) \
  --build-arg BUILD=$(BUILD) \
