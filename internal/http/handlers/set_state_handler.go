@@ -101,6 +101,10 @@ func appSetStateErrStatus(err error) int {
 		return http.StatusBadRequest
 	}
 
+	if errors.Is(err, context.DeadlineExceeded) {
+		return http.StatusServiceUnavailable
+	}
+
 	return http.StatusInternalServerError
 }
 

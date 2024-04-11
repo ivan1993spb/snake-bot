@@ -60,6 +60,8 @@ paths:
           $ref: '#/components/responses/AuthorizationError'
         500:
           $ref: '#/components/responses/ServerError'
+        503:
+          $ref: '#/components/responses/ServiceUnavailable'
     get:
       summary: Get the numbers of bots.
       description: |
@@ -114,6 +116,15 @@ components:
             $ref: '#/components/schemas/Error'
     AuthorizationError:
       description: Authorization error.
+      content:
+        text/yaml:
+          schema:
+            $ref: '#/components/schemas/Error'
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    ServiceUnavailable:
+      description: Service is unavailable.
       content:
         text/yaml:
           schema:

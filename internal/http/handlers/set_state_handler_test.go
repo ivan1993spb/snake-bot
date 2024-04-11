@@ -2,6 +2,7 @@ package handlers_test
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	"net/http"
 	"net/http/httptest"
@@ -201,5 +202,26 @@ func Test_SetStateHandler_TooManyBots(t *testing.T) {
 	defer resp.Body.Close()
 
 	require.Equal(t, http.StatusBadRequest, resp.StatusCode)
+	require.Equal(t, 1, app.SetOneCallCount())
+}
+
+func Test_SetStateHandler_ServiceUnavailable(t *testing.T) {
+	app := &handlersfakes.FakeAppSetState{}
+	app.SetOneReturns(nil, context.DeadlineExceeded)
+
+	server := httptest.NewServer(handlers.NewSetStateHandler(app))
+	defer server.Close()
+
+	form := url.Values{}
+	form.Add("game", "1")
+	form.Add("bots", "1")
+
+	// Content-Type: application/x-www-form-urlencoded
+	resp, err := server.Client().PostForm(server.URL, form)
+	require.NoError(t, err)
+	require.NotNil(t, resp)
+	defer resp.Body.Close()
+
+	require.Equal(t, http.StatusServiceUnavailable, resp.StatusCode)
 	require.Equal(t, 1, app.SetOneCallCount())
 }
