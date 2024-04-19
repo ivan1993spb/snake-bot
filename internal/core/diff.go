@@ -1,5 +1,6 @@
 package core
 
+// diff returns the difference between two maps.
 func diff(have, want map[int]int) map[int]int {
 	d := make(map[int]int)
 
@@ -24,4 +25,33 @@ func diff(have, want map[int]int) map[int]int {
 	}
 
 	return d
+}
+
+// invertDiff returns the inverted map.
+func invertDiff(m map[int]int) map[int]int {
+	r := make(map[int]int, len(m))
+	for k, v := range m {
+		r[k] = -v
+	}
+	return r
+}
+
+func stateBotsNumber(state map[int]int) int {
+	number := 0
+	for _, bots := range state {
+		number += bots
+	}
+	return number
+}
+
+func diffStats(m map[int]int) (int, int) {
+	var add, remove int
+	for _, v := range m {
+		if v > 0 {
+			add += v
+		} else {
+			remove -= v
+		}
+	}
+	return add, remove
 }

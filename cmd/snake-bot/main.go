@@ -2,69 +2,44 @@ package main
 
 import (
 	"context"
-	"math/rand"
 	"os"
 	"os/signal"
-	"time"
+	"syscall"
 
-	"github.com/sirupsen/logrus"
+	"github.com/spf13/afero"
+	"go.uber.org/automaxprocs/maxprocs"
 
+	"github.com/ivan1993spb/snake-bot/internal/app"
 	"github.com/ivan1993spb/snake-bot/internal/config"
-	"github.com/ivan1993spb/snake-bot/internal/connect"
-	"github.com/ivan1993spb/snake-bot/internal/core"
-	"github.com/ivan1993spb/snake-bot/internal/secure"
-	"github.com/ivan1993spb/snake-bot/internal/server"
 	"github.com/ivan1993spb/snake-bot/internal/utils"
 )
 
-const ApplicationName = "Snake-Bot"
-
-var (
-	Version = "dev"
-	Build   = "dev"
-)
-
-func init() {
-	rand.Seed(time.Now().UnixNano())
-}
-
 func main() {
-	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
+	ctx := context.Background()
+	ctx, cancel := signal.NotifyContext(ctx, os.Interrupt, syscall.SIGTERM)
 	defer cancel()
 
 	cfg, err := config.StdConfig()
 
-	{
-		logger := utils.NewLogger(cfg.Log)
-		ctx = utils.LogContext(ctx, logger)
-	}
+	ctx = utils.WithLogger(ctx, utils.NewLogger(cfg.Log))
+	ctx = utils.WithModule(ctx, "main")
+	log := utils.GetLogger(ctx)
 
 	if err != nil {
-		utils.Log(ctx).WithError(err).Fatal("config fail")
+		log.WithError(err).Fatal("config fail")
 	}
 
-	utils.Log(ctx).WithFields(logrus.Fields{
-		"version": Version,
-		"build":   Build,
-	}).Info("Welcome to Snake-Bot!")
-
-	sec := secure.NewSecure()
-	if err := sec.GenerateToken(os.Stdout); err != nil {
-		utils.Log(ctx).WithError(err).Fatal("security fail")
-	}
-	utils.Log(ctx).Warn("auth token successfully generated")
-
-	headerAppInfo := utils.FormatAppInfoHeader(ApplicationName, Version, Build)
-
-	connector := connect.NewConnector(cfg.Target, headerAppInfo)
-
-	c := core.NewCore(ctx, connector, cfg.Bots.Limit)
-
-	serv := server.NewServer(ctx, cfg.Server, headerAppInfo, c, sec)
-
-	if err := serv.ListenAndServe(ctx); err != nil {
-		utils.Log(ctx).WithError(err).Fatal("server error")
+	_, err = maxprocs.Set()
+	if err != nil {
+		log.WithError(err).Fatal("maxprocs fail")
 	}
 
-	utils.Log(ctx).Info("buh bye!")
+	application := &app.App{
+		Config: cfg,
+		Fs:     afero.NewOsFs(),
+		Clock:  utils.RealClock,
+		Rand:   utils.NewRand(utils.RealClock),
+	}
+
+	application.Run(ctx)
 }

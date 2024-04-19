@@ -14,7 +14,7 @@ func TestCacherDiscoverer_update_ReturnsIfPathEmpty(t *testing.T) {
 		scores: []int{},
 	}
 
-	head := types.Dot{1, 3}
+	head := types.Dot{X: 1, Y: 3}
 
 	d.update(head)
 }
@@ -22,12 +22,12 @@ func TestCacherDiscoverer_update_ReturnsIfPathEmpty(t *testing.T) {
 func TestCacherDiscoverer_update_CutsPath(t *testing.T) {
 	d := &CacherDiscoverer{
 		path: []types.Dot{
-			{1, 0},
-			{1, 1},
-			{1, 2},
-			{1, 3},
-			{1, 4},
-			{1, 5},
+			{X: 1, Y: 0},
+			{X: 1, Y: 1},
+			{X: 1, Y: 2},
+			{X: 1, Y: 3},
+			{X: 1, Y: 4},
+			{X: 1, Y: 5},
 		},
 		scores: []int{
 			1,
@@ -39,13 +39,13 @@ func TestCacherDiscoverer_update_CutsPath(t *testing.T) {
 		},
 	}
 
-	head := types.Dot{1, 3}
+	head := types.Dot{X: 1, Y: 3}
 
 	d.update(head)
 
 	expectPath := []types.Dot{
-		{1, 4},
-		{1, 5},
+		{X: 1, Y: 4},
+		{X: 1, Y: 5},
 	}
 	expectScores := []int{
 		0,
@@ -59,12 +59,12 @@ func TestCacherDiscoverer_update_CutsPath(t *testing.T) {
 func TestCacherDiscoverer_update_RemovesCache(t *testing.T) {
 	d := &CacherDiscoverer{
 		path: []types.Dot{
-			{1, 0},
-			{1, 1},
-			{1, 2},
-			{1, 3},
-			{1, 4},
-			{1, 5},
+			{X: 1, Y: 0},
+			{X: 1, Y: 1},
+			{X: 1, Y: 2},
+			{X: 1, Y: 3},
+			{X: 1, Y: 4},
+			{X: 1, Y: 5},
 		},
 		scores: []int{
 			1,
@@ -76,7 +76,7 @@ func TestCacherDiscoverer_update_RemovesCache(t *testing.T) {
 		},
 	}
 
-	head := types.Dot{1, 5}
+	head := types.Dot{X: 1, Y: 5}
 
 	d.update(head)
 

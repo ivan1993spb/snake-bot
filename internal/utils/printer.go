@@ -2,19 +2,17 @@ package utils
 
 import "github.com/sirupsen/logrus"
 
-type PrinterLog struct {
-	log logrus.FieldLogger
+type PrinterLogger struct {
+	log *logrus.Entry
 }
 
-const printerGameKey = "print_game"
-
-func NewPrinterLog(log logrus.FieldLogger, gameId int) *PrinterLog {
-	return &PrinterLog{
-		log: log.WithField(printerGameKey, gameId),
+func NewPrinterLogger(log *logrus.Entry) *PrinterLogger {
+	return &PrinterLogger{
+		log: log,
 	}
 }
 
-func (p *PrinterLog) Print(level, what, message string) {
+func (p *PrinterLogger) Print(level, what, message string) {
 	p.log.WithFields(logrus.Fields{
 		"level": level,
 		"what":  what,

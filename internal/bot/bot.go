@@ -56,7 +56,7 @@ func NewDijkstrasBot(world World) *Bot {
 	return NewBot(world, cacher)
 }
 
-func (b *Bot) Run(ctx context.Context, stop <-chan struct{}) <-chan types.Direction {
+func (b *Bot) Run(ctx context.Context) <-chan types.Direction {
 	chout := make(chan types.Direction)
 
 	go func() {
@@ -76,8 +76,6 @@ func (b *Bot) Run(ctx context.Context, stop <-chan struct{}) <-chan types.Direct
 					}
 					cancel()
 				}
-			case <-stop:
-				return
 			case <-ctx.Done():
 				return
 			}
@@ -127,7 +125,7 @@ func (b *Bot) operate(ctx context.Context) (types.Direction, bool) {
 		return types.DirectionZero, false
 	}
 	if b.lastDirection != direction || b.lastPosition != head {
-		utils.Log(ctx).WithFields(logrus.Fields{
+		utils.GetLogger(ctx).WithFields(logrus.Fields{
 			"head":      head,
 			"direction": direction,
 		}).Debugln("change direction")

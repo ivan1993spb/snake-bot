@@ -3,7 +3,7 @@ package config
 import (
 	"flag"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -155,12 +155,36 @@ func Test_ParseFlags_ParsesFlagsCorrectly(t *testing.T) {
 		expectErr:    false,
 	})
 
+	// Test case 9
+	configTest9 := defaultConfig
+	configTest9.Server.Address = "snakeonline.xyz:3211"
+	configTest9.Server.JWTSecret = "path/to/secret"
+	configTest9.Log.EnableJSON = true
+	configTest9.Bots.Limit = 120
+	configTest9.Server.Debug = true
+
+	tests = append(tests, &Test{
+		msg: "change address, JWT secret, logging, bots limit and debug",
+
+		args: []string{
+			"-address", "snakeonline.xyz:3211",
+			"-jwt-secret", "path/to/secret",
+			"-log-json",
+			"-bots-limit", "120",
+			"-debug",
+		},
+		defaults: defaultConfig,
+
+		expectConfig: configTest9,
+		expectErr:    false,
+	})
+
 	for n, test := range tests {
 		t.Log(test.msg)
 
 		label := fmt.Sprintf("case number %d", n+1)
 		flagSet := flag.NewFlagSet(flagSetName, flag.ContinueOnError)
-		flagSet.SetOutput(ioutil.Discard)
+		flagSet.SetOutput(io.Discard)
 
 		config, err := ParseFlags(flagSet, test.args, test.defaults)
 
@@ -175,17 +199,20 @@ func Test_ParseFlags_ParsesFlagsCorrectly(t *testing.T) {
 
 func Test_Config_Fields_ReturnsFieldsOfTheConfig(t *testing.T) {
 	require.Equal(t, map[string]interface{}{
-		fieldLabelAddress:    ":9999",
-		fieldLabelForbidCORS: true,
-		fieldLabelDebug:      true,
+		flagLabelAddress:    ":9999",
+		flagLabelJWTSecret:  "",
+		flagLabelForbidCORS: true,
+		flagLabelDebug:      true,
 
-		fieldLabelSnakeServer: "localhost:9210",
-		fieldLabelWSS:         false,
+		flagLabelSnakeServer: "localhost:9210",
+		flagLabelWSS:         false,
 
-		fieldLabelBotsLimit: 1337,
+		flagLabelBotsLimit: 1337,
 
-		fieldLabelLogEnableJSON: false,
-		fieldLabelLogLevel:      "warning",
+		flagLabelLogEnableJSON: false,
+		flagLabelLogLevel:      "warning",
+
+		flagLabelStoragePath: "/var/lib/snakepit",
 	}, Config{
 		Server: Server{
 			Address: ":9999",
@@ -196,7 +223,7 @@ func Test_Config_Fields_ReturnsFieldsOfTheConfig(t *testing.T) {
 
 		Target: Target{
 			Address: "localhost:9210",
-			WSS:         false,
+			WSS:     false,
 		},
 
 		Bots: Bots{
@@ -206,6 +233,10 @@ func Test_Config_Fields_ReturnsFieldsOfTheConfig(t *testing.T) {
 		Log: Log{
 			EnableJSON: false,
 			Level:      "warning",
+		},
+
+		Storage: Storage{
+			Path: "/var/lib/snakepit",
 		},
 	}.Fields())
 }

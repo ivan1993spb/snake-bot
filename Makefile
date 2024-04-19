@@ -6,14 +6,18 @@ _=$(foreach exec,$(EXECUTABLES), \
 
 IMAGE=ivan1993spb/snake-bot
 
-IMAGE_GOLANG=golang:1.19.5-alpine3.16
-IMAGE_ALPINE=alpine:3.16
+IMAGE_GOLANG=golang:1.21.5-alpine3.19
+IMAGE_ALPINE=alpine:3.19
 
 BINARY_NAME=snake-bot
 VERSION=$(shell git describe --tags --abbrev=0 2>/dev/null || echo v0.0.0)
 BUILD=$(shell git rev-parse --short HEAD)
 
-LDFLAGS=-ldflags "-s -w -X main.Version=$(VERSION) -X main.Build=$(BUILD)"
+MODULE=github.com/ivan1993spb/snake-bot
+LDFLAGS=-ldflags "-s -w \
+	-X $(MODULE)/internal/app.Version=$(VERSION) \
+	-X $(MODULE)/internal/app.Build=$(BUILD)"
+
 DOCKER_BUILD_ARGS=\
  --build-arg VERSION=$(VERSION) \
  --build-arg BUILD=$(BUILD) \

@@ -3,14 +3,14 @@ openapi: 3.0.3
 info:
   title: Snake-Bot API
   description: |
-    Snake-Bot provides control over a swarm of bots running on a
+    Snake-Bot service controls a swarm of bots running on a
     preconfigured instance of Snake-Server.
-  version: 0.0.0
+  version: 1.0.0
   license:
     name: MIT
   contact:
     name: Ivan Pushkin
-    url: https://twitter.com/IvanDeveloper
+    url: https://github.com/ivan1993spb
 
 servers:
   - url: /api
@@ -25,13 +25,13 @@ servers:
 paths:
   /bots:
     post:
-      summary: Launches a swarm of bots in specified games.
+      summary: Start bots.
       description: |
-        The method launches a given number of bots in a specified games.
+        The method starts the given numbers of bots in specified games.
       tags:
         - Bots
       security:
-        - ApiKeyAuth: []
+        - bearerAuth: []
       requestBody:
         required: true
         content:
@@ -46,32 +46,30 @@ paths:
               $ref: '#/components/schemas/Games'
       responses:
         201:
-          description: Current setup.
+          description: The bots have been started.
           content:
-            application/json:
+            text/yaml:
               schema:
                 $ref: '#/components/schemas/Games'
-            text/yaml:
+            application/json:
               schema:
                 $ref: '#/components/schemas/Games'
         400:
           $ref: '#/components/responses/InvalidParameters'
+        401:
+          $ref: '#/components/responses/AuthorizationError'
         500:
           $ref: '#/components/responses/ServerError'
         503:
-          description: Service unavailable, cannot create bots.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        404:
-          $ref: '#/components/responses/GameNotFound'
+          $ref: '#/components/responses/ServiceUnavailable'
     get:
-      summary: Returns the working current setup.
+      summary: Get the numbers of bots.
+      description: |
+        Returns the numbers of bots for each game.
       tags:
         - Bots
       security:
-        - ApiKeyAuth: []
+        - bearerAuth: []
       responses:
         200:
           description: Current setup.
@@ -82,52 +80,76 @@ paths:
             text/yaml:
               schema:
                 $ref: '#/components/schemas/Games'
+        400:
+          $ref: '#/components/responses/InvalidParameters'
+        401:
+          $ref: '#/components/responses/AuthorizationError'
+        500:
+          $ref: '#/components/responses/ServerError'
 
 components:
 
   securitySchemes:
-
-    ApiKeyAuth:
-      type: apiKey
-      in: header
-      name: X-Snake-Bot-Token
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
 
   responses:
     InvalidParameters:
       description: Invalid parameters.
       content:
+        text/yaml:
+          schema:
+            $ref: '#/components/schemas/Error'
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
     ServerError:
-      description: An internal server error.
+      description: Internal server error.
       content:
+        text/yaml:
+          schema:
+            $ref: '#/components/schemas/Error'
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
-    GameNotFound:
-      description: A game has not been found.
+    AuthorizationError:
+      description: Authorization error.
       content:
+        text/yaml:
+          schema:
+            $ref: '#/components/schemas/Error'
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
+    ServiceUnavailable:
+      description: Service is unavailable.
+      content:
+        text/yaml:
+          schema:
+            $ref: '#/components/schemas/Error'
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
 
   schemas:
     
     Game:
       type: object
       description: |
-        The object contains a game identifier and a number of bots to launch.
+        The object contains a game ID and a number of bots.
       required:
         - game
         - bots
       properties:
         game:
-          description: A game identifier.
+          description: Game ID
           type: integer
           format: int32
         bots:
-          description: A bots number.
+          description: Number of bots
           type: integer
           format: int32
 
@@ -138,7 +160,7 @@ components:
         - games
       properties:
         games:
-          description: A list of game identifiers and numbers of bots.
+          description: A list of game IDs and numbers of bots.
           type: array
           items:
             $ref: '#/components/schemas/Game'
@@ -146,8 +168,7 @@ components:
     Error:
       type: object
       description: |
-        The object contains an error code and short description of what went
-        wrong.
+        The object contains an error code and short description.
       required:
         - code
         - text

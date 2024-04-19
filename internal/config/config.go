@@ -8,6 +8,7 @@ import (
 // Default values for the server's settings
 const (
 	defaultAddress    = ":8080"
+	defaultJWTSecret  = "/etc/snake-bot/jwt-secret.base64"
 	defaultForbidCORS = false
 	defaultDebug      = false
 
@@ -18,11 +19,14 @@ const (
 
 	defaultLogEnableJSON = false
 	defaultLogLevel      = "info"
+
+	defaultStoragePath = ""
 )
 
 // Flag labels
 const (
 	flagLabelAddress    = "address"
+	flagLabelJWTSecret  = "jwt-secret"
 	flagLabelForbidCORS = "forbid-cors"
 	flagLabelDebug      = "debug"
 
@@ -33,11 +37,14 @@ const (
 
 	flagLabelLogEnableJSON = "log-json"
 	flagLabelLogLevel      = "log-level"
+
+	flagLabelStoragePath = "storage"
 )
 
 // Flag usage descriptions
 const (
 	flagUsageAddress    = "address to listen to"
+	flagUsageJWTSecret  = "path to a base64 encoded secret for JWT signing"
 	flagUsageForbidCORS = "forbid cross-origin resource sharing"
 	flagUsageDebug      = "add profiling routes"
 
@@ -48,26 +55,14 @@ const (
 
 	flagUsageLogEnableJSON = "use json logging format"
 	flagUsageLogLevel      = "log level: panic, fatal, error, warning, info or debug"
-)
 
-// Label names
-const (
-	fieldLabelAddress    = "address"
-	fieldLabelForbidCORS = "forbid-cors"
-	fieldLabelDebug      = "debug"
-
-	fieldLabelSnakeServer = "snake server"
-	fieldLabelWSS         = "wss"
-
-	fieldLabelBotsLimit = "bots-limit"
-
-	fieldLabelLogEnableJSON = "log-json"
-	fieldLabelLogLevel      = "log-level"
+	flagUsageStoragePath = "path to a state file"
 )
 
 // Server structure contains configurations for the server
 type Server struct {
 	Address    string
+	JWTSecret  string
 	ForbidCORS bool
 	Debug      bool
 }
@@ -87,28 +82,37 @@ type Log struct {
 	Level      string
 }
 
+// Storage structure defines preferences for storage
+type Storage struct {
+	Path string
+}
+
 // Config is a base server configuration structure
 type Config struct {
-	Server Server
-	Target Target
-	Log    Log
-	Bots   Bots
+	Server  Server
+	Target  Target
+	Log     Log
+	Bots    Bots
+	Storage Storage
 }
 
 // Fields returns a map of all configurations
 func (c Config) Fields() map[string]interface{} {
 	return map[string]interface{}{
-		fieldLabelAddress:    c.Server.Address,
-		fieldLabelForbidCORS: c.Server.ForbidCORS,
-		fieldLabelDebug:      c.Server.Debug,
+		flagLabelAddress:    c.Server.Address,
+		flagLabelJWTSecret:  c.Server.JWTSecret,
+		flagLabelForbidCORS: c.Server.ForbidCORS,
+		flagLabelDebug:      c.Server.Debug,
 
-		fieldLabelSnakeServer: c.Target.Address,
-		fieldLabelWSS:         c.Target.WSS,
+		flagLabelSnakeServer: c.Target.Address,
+		flagLabelWSS:         c.Target.WSS,
 
-		fieldLabelBotsLimit: c.Bots.Limit,
+		flagLabelBotsLimit: c.Bots.Limit,
 
-		fieldLabelLogEnableJSON: c.Log.EnableJSON,
-		fieldLabelLogLevel:      c.Log.Level,
+		flagLabelLogEnableJSON: c.Log.EnableJSON,
+		flagLabelLogLevel:      c.Log.Level,
+
+		flagLabelStoragePath: c.Storage.Path,
 	}
 }
 
@@ -116,6 +120,7 @@ func (c Config) Fields() map[string]interface{} {
 var defaultConfig = Config{
 	Server: Server{
 		Address:    defaultAddress,
+		JWTSecret:  defaultJWTSecret,
 		ForbidCORS: defaultForbidCORS,
 		Debug:      defaultDebug,
 	},
@@ -132,6 +137,10 @@ var defaultConfig = Config{
 	Log: Log{
 		EnableJSON: defaultLogEnableJSON,
 		Level:      defaultLogLevel,
+	},
+
+	Storage: Storage{
+		Path: defaultStoragePath,
 	},
 }
 
@@ -151,6 +160,8 @@ func ParseFlags(flagSet *flag.FlagSet, args []string, defaults Config) (Config, 
 	// Address
 	flagSet.StringVar(&config.Server.Address, flagLabelAddress,
 		defaults.Server.Address, flagUsageAddress)
+	flagSet.StringVar(&config.Server.JWTSecret, flagLabelJWTSecret,
+		defaults.Server.JWTSecret, flagUsageJWTSecret)
 	flagSet.BoolVar(&config.Server.ForbidCORS, flagLabelForbidCORS,
 		defaults.Server.ForbidCORS, flagUsageForbidCORS)
 	flagSet.BoolVar(&config.Server.Debug, flagLabelDebug,
@@ -169,6 +180,10 @@ func ParseFlags(flagSet *flag.FlagSet, args []string, defaults Config) (Config, 
 		defaults.Log.EnableJSON, flagUsageLogEnableJSON)
 	flagSet.StringVar(&config.Log.Level, flagLabelLogLevel,
 		defaults.Log.Level, flagUsageLogLevel)
+
+	// Storage
+	flagSet.StringVar(&config.Storage.Path, flagLabelStoragePath,
+		defaults.Storage.Path, flagUsageStoragePath)
 
 	if err := flagSet.Parse(args); err != nil {
 		return defaults, fmt.Errorf("cannot parse flags: %s", err)
