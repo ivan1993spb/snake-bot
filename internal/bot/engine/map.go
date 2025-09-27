@@ -71,6 +71,12 @@ func (m *Map) SaveObject(object *types.Object) {
 	}
 }
 
+func (m *Map) SaveObjectDot(object *types.Object, dot types.Dot) {
+	if m.area.Fits(dot) {
+		atomic.SwapPointer(&m.fields[dot.Y][dot.X], unsafe.Pointer(object))
+	}
+}
+
 func (m *Map) Clear(dots []types.Dot) {
 	for _, dot := range dots {
 		if m.area.Fits(dot) {
@@ -79,5 +85,11 @@ func (m *Map) Clear(dots []types.Dot) {
 				unsafe.Pointer(uintptr(0)),
 			)
 		}
+	}
+}
+
+func (m *Map) ClearDot(dot types.Dot) {
+	if m.area.Fits(dot) {
+		atomic.SwapPointer(&m.fields[dot.Y][dot.X], unsafe.Pointer(uintptr(0)))
 	}
 }
