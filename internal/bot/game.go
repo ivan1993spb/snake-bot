@@ -52,6 +52,45 @@ func (g *Game) Update(object *types.Object) {
 	}
 }
 
+func (g *Game) UpdateV2(update *types.UpdateV2) {
+	g.mux.Lock()
+	defer g.mux.Unlock()
+	object, ok := g.objects[update.Id]
+	if !ok {
+		return
+	}
+	// Only for snakes because only snakes grow.
+	if object.Type == types.ObjectTypeSnake && update.Add != nil {
+		// Add new head to the snake's body
+		object.Dots = append([]types.Dot{*update.Add}, object.Dots...)
+		if g.state == gameStateReady {
+			g._map.SaveObjectDot(object, *update.Add)
+		}
+	} else if object.Type == types.ObjectTypeMouse && update.Dot != nil {
+		// Only for mice because only mice changes its coordinates.
+		if g.state == gameStateReady {
+			g._map.ClearDot(object.Dot)
+			g._map.SaveObjectDot(object, *update.Dot)
+		}
+		object.Dot = *update.Dot
+	}
+	if update.Del != nil {
+		// Most of updates are coming for snakes. So we search from the end
+		// because we are looking to delete the tail. The same logic
+		// applies for other food objects.
+		for i := len(object.Dots) - 1; i >= 0; i-- {
+			if object.Dots[i] == *update.Del {
+				// Now tails is found.
+				object.Dots = append(object.Dots[:i], object.Dots[i+1:]...)
+				if g.state == gameStateReady {
+					g._map.ClearDot(*update.Del)
+				}
+				break
+			}
+		}
+	}
+}
+
 func (g *Game) Delete(object *types.Object) {
 	g.mux.Lock()
 	defer g.mux.Unlock()

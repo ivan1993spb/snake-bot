@@ -23,6 +23,7 @@ type Size interface {
 type Game interface {
 	Create(object *types.Object)
 	Update(object *types.Object)
+	UpdateV2(update *types.UpdateV2)
 	Delete(object *types.Object)
 }
 
@@ -83,6 +84,14 @@ func (p *Parser) ParseGameEvent(data []byte) error {
 		p.Printer.Print("game", "error", errorMessage)
 		return nil
 	}
+	if event.Type == types.GameEventTypeUpdateV2 {
+		var update *types.UpdateV2
+		if err := json.Unmarshal(event.Payload, &update); err != nil {
+			return errors.Wrap(err, errParseGameEventAnnotation)
+		}
+		p.Game.UpdateV2(update)
+		return nil
+	}
 	var object *types.Object
 	if err := json.Unmarshal(event.Payload, &object); err != nil {
 		return errors.Wrap(err, errParseGameEventAnnotation)
@@ -93,6 +102,7 @@ func (p *Parser) ParseGameEvent(data []byte) error {
 	case types.GameEventTypeDelete:
 		p.Game.Delete(object)
 	case types.GameEventTypeUpdate:
+		// Legacy update event with full object info.
 		p.Game.Update(object)
 	case types.GameEventTypeChecked:
 		// ignore deprecated feature.

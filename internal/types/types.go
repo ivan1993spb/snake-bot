@@ -35,11 +35,12 @@ type Message struct {
 type GameEventType string
 
 const (
-	GameEventTypeError   GameEventType = "error"
-	GameEventTypeCreate  GameEventType = "create"
-	GameEventTypeDelete  GameEventType = "delete"
-	GameEventTypeUpdate  GameEventType = "update"
-	GameEventTypeChecked GameEventType = "checked"
+	GameEventTypeError    GameEventType = "error"
+	GameEventTypeCreate   GameEventType = "create"
+	GameEventTypeDelete   GameEventType = "delete"
+	GameEventTypeUpdate   GameEventType = "update"
+	GameEventTypeUpdateV2 GameEventType = "update_v2"
+	GameEventTypeChecked  GameEventType = "checked"
 )
 
 type GameEvent struct {
@@ -176,6 +177,28 @@ func (o *Object) GetDots() []Dot {
 		return o.Dots
 	}
 	return []Dot{}
+}
+
+// UpdateV2 represents a change to an existing object. It is more compact
+// than sending the whole object again.
+//
+// Remove a dot from the object's body: `{"id": 2, "del": [1, 2]}`
+//
+// Add a dot: `{"id": 2, "add": [1, 2]}`
+//
+// Add and remove some dots simultaneously: `{"id": 2, "add": [1, 2], "del": [3, 3]}`
+//
+// Change the coordinates for a 1-dot object: `{"id": 2, "dot": [1, 2]}`
+type UpdateV2 struct {
+	// Object ID
+	Id uint32 `json:"id"`
+	// To remove a dot from the object's body
+	Del *Dot `json:"del,omitempty"`
+	// To add a dot to the object's body
+	Add *Dot `json:"add,omitempty"`
+	// To change the object's position if object has only one dot. Like a
+	// mouse.
+	Dot *Dot `json:"dot,omitempty"`
 }
 
 type Size struct {
