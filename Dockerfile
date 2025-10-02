@@ -16,6 +16,10 @@ ARG BUILD=unknown
 
 WORKDIR /go/src/snake-bot
 
+COPY go.mod go.sum ./
+
+RUN go mod download -x
+
 COPY . .
 
 ENV CGO_ENABLED=0
