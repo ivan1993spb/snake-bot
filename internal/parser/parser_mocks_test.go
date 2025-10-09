@@ -50,6 +50,10 @@ func (m *MockGame) Delete(object *types.Object) {
 	m.Called(object)
 }
 
+func (m *MockGame) DeleteV2(id uint32) {
+	m.Called(id)
+}
+
 type MockPrinter struct {
 	mock.Mock
 }

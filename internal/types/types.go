@@ -38,6 +38,7 @@ const (
 	GameEventTypeError    GameEventType = "error"
 	GameEventTypeCreate   GameEventType = "create"
 	GameEventTypeDelete   GameEventType = "delete"
+	GameEventTypeDeleteV2 GameEventType = "delete_v2"
 	GameEventTypeUpdate   GameEventType = "update"
 	GameEventTypeUpdateV2 GameEventType = "update_v2"
 	GameEventTypeChecked  GameEventType = "checked"
