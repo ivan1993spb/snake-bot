@@ -100,6 +100,19 @@ func (g *Game) Delete(object *types.Object) {
 	}
 }
 
+func (g *Game) DeleteV2(id uint32) {
+	g.mux.Lock()
+	defer g.mux.Unlock()
+	object, ok := g.objects[id]
+	if !ok {
+		return
+	}
+	if g.state == gameStateReady {
+		g._map.Clear(object.GetDots())
+	}
+	delete(g.objects, id)
+}
+
 func (g *Game) GetObject(id uint32) (*types.Object, bool) {
 	g.mux.RLock()
 	defer g.mux.RUnlock()

@@ -25,6 +25,7 @@ type Game interface {
 	Update(object *types.Object)
 	UpdateV2(update *types.UpdateV2)
 	Delete(object *types.Object)
+	DeleteV2(id uint32)
 }
 
 type Printer interface {
@@ -92,6 +93,14 @@ func (p *Parser) ParseGameEvent(data []byte) error {
 		p.Game.UpdateV2(update)
 		return nil
 	}
+	if event.Type == types.GameEventTypeDeleteV2 {
+		var id uint32
+		if err := json.Unmarshal(event.Payload, &id); err != nil {
+			return errors.Wrap(err, errParseGameEventAnnotation)
+		}
+		p.Game.DeleteV2(id)
+		return nil
+	}
 	var object *types.Object
 	if err := json.Unmarshal(event.Payload, &object); err != nil {
 		return errors.Wrap(err, errParseGameEventAnnotation)
@@ -100,6 +109,7 @@ func (p *Parser) ParseGameEvent(data []byte) error {
 	case types.GameEventTypeCreate:
 		p.Game.Create(object)
 	case types.GameEventTypeDelete:
+		// Legacy delete event with full object info.
 		p.Game.Delete(object)
 	case types.GameEventTypeUpdate:
 		// Legacy update event with full object info.
