@@ -42,8 +42,16 @@ func (m *MockGame) Update(object *types.Object) {
 	m.Called(object)
 }
 
+func (m *MockGame) UpdateV2(update *types.UpdateV2) {
+	m.Called(update)
+}
+
 func (m *MockGame) Delete(object *types.Object) {
 	m.Called(object)
+}
+
+func (m *MockGame) DeleteV2(id uint32) {
+	m.Called(id)
 }
 
 type MockPrinter struct {
