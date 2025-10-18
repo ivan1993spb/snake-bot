@@ -56,4 +56,4 @@ curl -X POST -H "$header" --data-binary @bots.json -H 'Content-Type: application
 
 ### License
 
-See [LICENSE](LICENSE).
+See [LICENSE](LICENSE)
